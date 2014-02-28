@@ -44,6 +44,7 @@ var force = function(nodes, edges, s, l, r, c)
 		var d = distance(u, v);
 		var dx = u.x - v.x;
 		var dy = u.y - v.y;
+		
 		if (d === 0)
 		{
 			d = 0.001;

@@ -8,7 +8,6 @@ var init = function()
 	var width = 2,
 		height = 2,
 		k = Math.sqrt(width * height / nodes);
-	console.log(k);
 
 	// Force Directed
 	var s = -1/k,
@@ -20,14 +19,12 @@ var init = function()
 	// Animation
 	var timeout = 20;
 
-
-
 	// Initialize the graph
 	var gr = new sigma(
 	{ 
 		graph: randomGraph(nodes, density, width, height), 
 		container : 'container',
-	});		
+	});
 	
 	// Starts the force directed algorithm
 	var start = function()
@@ -40,24 +37,11 @@ var init = function()
 			if (change < stop)
 			{
 				clearInterval(interval);
-				console.log('done in ' + i +' iterations');
-				console.log(distances(gr.graph.nodes()));
+				console.log('We were done in ' + i +' iterations');
 			}
 
 			gr.refresh();
 		}, timeout); 
-	}
-
-	var distances = function(nodes)
-	{
-		var result = [];
-		for (var i = 0, n1; n1 = nodes[i]; i++)
-		{
-			result[i] = [];
-			for (var j = 0, n2; n2 = nodes[j]; j++)
-				result[i][j] = Math.sqrt((n1.x - n2.x) * (n1.x - n2.x) + (n1.y - n2.y) * (n1.y - n2.y));
-		}
-		return result;
 	}
 
 	// Add a button
