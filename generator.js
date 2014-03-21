@@ -25,24 +25,25 @@
 		this.size = size;
 	}
 
-	generator.generateSquareGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
-	{
-		var graph = new Graph();
-		for (var y = 0; y < height; y++)
-			for (var x = 0; x < width; x++)
-			{
-				var index = y * width + x;
-				var node = new Node(index, nodecolor, nodesize, x / width, y / height);
-				graph.nodes.push(node);
+	// TODO: Refactor
+	// generator.generateSquareGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
+	// {
+	// 	var graph = new Graph();
+	// 	for (var y = 0; y < height; y++)
+	// 		for (var x = 0; x < width; x++)
+	// 		{
+	// 			var index = y * width + x;
+	// 			var node = new Node(index, nodecolor, nodesize, x / width, y / height);
+	// 			graph.nodes.push(node);
 
-				if (x > 0)
-					graph.edges.push(new Edge(graph.edges.length, index, index - 1, edgecolor, edgesize));
-				if (y > 0)
-					graph.edges.push(new Edge(graph.edges.length, index, index - width, edgecolor, edgesize));
-			}
+	// 			if (x > 0)
+	// 				graph.edges.push(new Edge(graph.edges.length, index, index - 1, edgecolor, edgesize));
+	// 			if (y > 0)
+	// 				graph.edges.push(new Edge(graph.edges.length, index, index - width, edgecolor, edgesize));
+	// 		}
 
-		return graph;
-	}
+	// 	return graph;
+	// }
 
 	generator.generateSierpinskiGraph = function(maxDepth, nodecolor, nodesize, edgecolor, edgesize)
 	{
@@ -56,46 +57,61 @@
 			this.c = c;
 		};
 
+		// Start with 3 node in a triangle
 		graph.nodes = graph.nodes.concat([
 			new Node(0, nodecolor, nodesize, 0, 1),
 			new Node(1, nodecolor, nodesize, 1, 1),
 			new Node(2, nodecolor, nodesize, 0.5, 0.5)
 		]);
 
-		var current = [new Triangle(graph.nodes[0], graph.nodes[1], graph.nodes[2])];
-		while (depth++ < maxDepth)
+		// Create a starting triangle, and then iterate over the depth
+		var currentTriangles = [new Triangle(graph.nodes[0], graph.nodes[1], graph.nodes[2])];
+		for(var depth = 1; depth < maxDepth; depth++)
 		{
-			var next = [];
-			for (var i = 0, t; t = current[i]; i++)
+			var nextTriangles = [];
+
+			// Current triangles are all triangles on the current depth
+			// Iterate over all of them, and put the triangles for the next depth in nextTriangles
+			for (var i = 0; i < currentTriangles.length; i++)
 			{
-				var l = graph.nodes.length;
-				var ab = new Node(l, nodecolor, nodesize, t.a.x + (t.b.x - t.a.x) / 2, t.a.y + (t.b.y - t.a.y) / 2);
-				var ac = new Node(l+1, nodecolor, nodesize, t.a.x + (t.c.x - t.a.x) / 2, t.a.y + (t.c.y - t.a.y) / 2);
-				var bc = new Node(l+2, nodecolor, nodesize, t.b.x + (t.c.x - t.b.x) / 2, t.b.y + (t.c.y - t.b.y) / 2);
+				var currentTriangle = currentTriangles[i];
+
+				var nodeAmount = graph.nodes.length;
+				var ab = new Node(nodeAmount, nodecolor, nodesize, currentTriangle.a.x + (currentTriangle.b.x - currentTriangle.a.x) / 2, currentTriangle.a.y + (currentTriangle.b.y - currentTriangle.a.y) / 2);
+				var ac = new Node(nodeAmount + 1, nodecolor, nodesize, currentTriangle.a.x + (currentTriangle.c.x - currentTriangle.a.x) / 2, currentTriangle.a.y + (currentTriangle.c.y - currentTriangle.a.y) / 2);
+				var bc = new Node(nodeAmount + 2, nodecolor, nodesize, currentTriangle.b.x + (currentTriangle.c.x - currentTriangle.b.x) / 2, currentTriangle.b.y + (currentTriangle.c.y - currentTriangle.b.y) / 2);
 				graph.nodes = graph.nodes.concat([ab, ac, bc]);
 
-				next = next.concat([new Triangle(t.a, ab, ac), new Triangle(t.b, bc, ab), new Triangle(t.c, bc, ac)]);
+				nextTriangles = nextTriangles.concat([new Triangle(currentTriangle.a, ab, ac), new Triangle(currentTriangle.b, bc, ab), new Triangle(currentTriangle.c, bc, ac)]);
 			}
-			current = next;
+
+			currentTriangles = nextTriangles;
 		}
 
-		for (var i = 0, t; t = current[i]; i++)
-			graph.edges = graph.edges.concat([
-				new Edge(3*i, t.a.id, t.b.id, edgecolor, edgesize),
-				new Edge(3*i+1, t.a.id, t.c.id, edgecolor, edgesize),
-				new Edge(3*i+2, t.b.id, t.c.id, edgecolor, edgesize)
-			]);
-
-		return graph;
-	}
-
-	generator.randomize = function(graph)
-	{
-		for (var i = 0, node; node = graph.nodes[i]; i++)
+		// We can only create the edges once we have all nodes in place
+		// Create those edges now
+		for (var i = 0; i < currentTriangles.length; i++) 
 		{
-			node.x = Math.random();
-			nody.y = Math.random();
+			var currentTriangle = currentTriangles[i];
+
+			graph.edges = graph.edges.concat([
+				new Edge(3 * i, currentTriangle.a.id, currentTriangle.b.id, edgecolor, edgesize),
+				new Edge(3 * i + 1, currentTriangle.a.id, currentTriangle.c.id, edgecolor, edgesize),
+				new Edge(3 * i + 2, currentTriangle.b.id, currentTriangle.c.id, edgecolor, edgesize)
+			]);
 		}
+
 		return graph;
 	}
+
+	// generator.randomize = function(graph)
+	// {
+	// 	for (var i = 0, node; node = graph.nodes[i]; i++)
+	// 	{
+	// 		node.x = Math.random();
+	// 		nody.y = Math.random();
+	// 	}
+	// 	return graph;
+	// }
+	
 }(window.generator = window.generator || {}))

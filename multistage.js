@@ -1,135 +1,14 @@
 (function(multistage)
 {
-	multistage.createLayout = function(nodes, edges)
-	{
-		var vertices = toVertices(nodes, edges);
-		var length = vertices.length;
-		var tree = merge(vertices);
-		var depth = tree.depth
-		var current = tree.vertices;
-		for (var i = 0, vertex; vertex = current[i]; i++)
-		{
-			current[i].x = Math.random();
-			current[i].y = Math.random();
-		}
-		
-		var end = 0;
-		var total = 0;
-		while (depth >= end)
-		{
-			var k = 1 * Math.pow(1.3, depth) / Math.sqrt(length),
-				s = -1/k,
-				l = 0,
-				r = k * k,
-				c = 1 / (length * Math.sqrt(current.length)),
-				stop = c;
-
-			var iterations = 0;
-			do 
-			{
-				iterations++;
-			}
-			while(force(current, s, l, r, c) / current.length > stop);
-			total += iterations;
-
-			console.log(iterations + ' iterations at depth ' + depth + ' with k = ' + k + ', c = ' + c + ' and stop = ' + stop);
-
-			if (depth-- === end)
-				continue;
-
-			var next = [];
-			for (var i = 0, vertex; vertex = current[i]; i++)
-			{
-				vertex.left.x = vertex.x;
-				vertex.left.y = vertex.y;
-				next.push(vertex.left);
-
-				if (vertex.right)
-				{
-					vertex.right.x = vertex.x;
-					vertex.right.y = vertex.y;
-					next.push(vertex.right);
-				}
-			}
-			current = next;
-		}
-
-		console.log('We were done after ' + total + ' iterations');
-		return toGraph(current);
-	}
-
-	var supervertex = function(left, right, id)
-	{
-		this.id = id;
-		this.left = left;
-		this.right = right;
-		this.weight = 0;
-		this.adj = [];
-
-		this.weight += left.weight;
-		left.parent = this;
-
-		if (right)
-		{
-			this.weight += right.weight;
-			right.parent = this;
-		}
-	}
-
-	var merge = function(vertices)
-	{
-		var depth = 0;
-
-		while (vertices.length > 1)
-		{
-			var next = [];
-			vertices.sort(function(a, b){ return a.weight - b.weight; });
-			var visited = [];
-
-			for (var i = 0, vertex; vertex = vertices[i]; i++)
-			{
-				if (visited[i])
-					continue;
-
-				var match = i;
-				for (var j = i + 1, v; v = vertices[j]; j++)
-					if (!visited[j] && vertex.adj.indexOf(v) !== -1)
-					{
-						match = j;
-						visited[j] = true;
-						next.push(new supervertex(vertex, v, next.length));
-						break;
-					}
-
-				visited[i] = true;
-				if (match === i)
-					next.push(new supervertex(vertex, null, next.length));
-			}
-
-			for (var i = 0, vertex; vertex = next[i]; i++)
-			{
-				for (var j = 0, neighbor; neighbor = vertex.left.adj[j]; j++)
-					if (neighbor.parent.id !== vertex.id && vertex.adj.indexOf(neighbor.parent) === -1)
-						vertex.adj.push(neighbor.parent);
-
-				if (vertex.right)
-					for (var j = 0, neighbor; neighbor = vertex.right.adj[j]; j++)
-						if (neighbor.parent.id !== vertex.id && vertex.adj.indexOf(neighbor.parent) === -1)
-							vertex.adj.push(neighbor.parent);
-			}
-
-			depth++;
-			if (next.length / vertices.length > 0.8)
-				return { vertices: next, depth: depth };
-
-			vertices = next;
-		}
-		return { vertices: vertices, depth: depth };
-	}
-
+	// Input: A list of nodes and a list of edges
+	// Return value: A list of vertices, consisting of:
+	//	* ID
+	//  * Adjacency list
+	//  * Weight (default 1)
 	var toVertices = function(nodes, edges)
 	{
 		var vertices = [];
+
 		for (var i = 0, node; node = nodes[i]; i++)
 			vertices.push({ id: node.id, adj: [], weight: 1 });
 
@@ -142,10 +21,194 @@
 		return vertices;
 	}
 
+	multistage.createLayout = function(nodes, edges)
+	{
+		var vertices = toVertices(nodes, edges);
+		var verticeAmount = vertices.length;
+		
+		var tree = merge(vertices);
+		var supervertices = tree.supervertices;
+
+		// Give all (usually a single one) supervertices a random position
+		for (var i = 0, vertex; vertex = supervertices[i]; i++)
+		{
+			supervertices[i].x = Math.random();
+			supervertices[i].y = Math.random();
+		}
+		
+		var zero = 0;
+		var totalIterations = 0;
+
+		for(var depth = tree.maxdepth; depth >= zero; depth--)
+		{
+			// k: spring constant
+			// s: stiffness of the edges
+			// l: optimum distance between vertices (also A LIE)
+			// r: repulsion between vertices
+			// c: some constant
+
+			var k = 1 * Math.pow(1.3, depth) / Math.sqrt(verticeAmount),
+				s = -1/k,
+				l = 0,
+				r = k * k,
+				c = 1 / (verticeAmount * Math.sqrt(supervertices.length)),
+				stop = c;
+
+			// Iteratively exectute the force-directed algorithm
+			var iterations = 0;
+			while(true) {
+				
+				var change = force(supervertices, s, l, r, c) / supervertices.length;
+				
+				iterations++;
+				totalIterations++;
+
+				if(change <= stop) {
+					break;
+				}
+			}
+
+			if(window.forceDebug)
+				console.log(iterations + ' iterations at depth ' + depth + ' with k = ' + k + ', c = ' + c + ' and stop = ' + stop);
+
+			if (depth === zero)
+				break;
+
+			// Expand all the supervertices into their left/right children
+			var nextSupervertices = [];
+			for (var i = 0, supervertex; supervertex = supervertices[i]; i++)
+			{
+				// Place the children on the position of the supervertex
+				supervertex.left.x = supervertex.x;
+				supervertex.left.y = supervertex.y;
+				nextSupervertices.push(supervertex.left);
+
+				if (supervertex.right)
+				{
+					supervertex.right.x = supervertex.x;
+					supervertex.right.y = supervertex.y;
+					nextSupervertices.push(supervertex.right);
+				}
+			}
+
+			supervertices = nextSupervertices;
+		}
+
+		if(window.forceDebug)
+			console.log('We were done after ' + totalIterations + ' iterations');
+		
+		// Convert all our vertices to a graph
+		return toGraph(supervertices);
+	}
+
+	var Supervertex = function(left, right, id)
+	{
+		this.id = id;
+		this.left = left;
+		this.right = right;
+		this.weight = left.weight;
+		this.adj = [];
+
+		left.supervertex = this;
+
+		if(right)
+		{
+			this.weight += right.weight;
+			right.supervertex = this;
+		}
+	}
+
+	// Input: List of vertices
+	// Output: Tree object, consisting of:
+	// * Supervertices
+	// * Maximum depth
+	var merge = function(vertices)
+	{
+		// Loop until we have merged all vertices to a single one
+		for(var depth = 0; vertices.length > 1; depth++)
+		{
+			var supervertices = [];
+			var visited = [];
+			
+			// TODO: Do we need this?
+			vertices.sort(function(a, b){ return a.weight - b.weight; });
+
+			// Loop across all vertices, and create supervertices
+			for (var i = 0, vertexA; vertexA = vertices[i]; i++)
+			{
+				if (visited[i])
+					continue;
+
+				visited[i] = true;
+				var foundMatchingVertex = false;
+
+				// Find the first vertex, that is not visited and is adjacent to vertexA
+				for (var j = i + 1, vertexB; vertexB = vertices[j]; j++)
+				{
+					if (!visited[j] && vertexA.adj.indexOf(vertexB) !== -1)
+					{
+						visited[j] = true;
+						foundMatchingVertex = true;
+						
+						// Combine vertexA and vertexB into a supervertex, and store
+						supervertices.push(new Supervertex(vertexA, vertexB, supervertices.length));
+						break;
+					}
+				}
+
+				// If we didn't find a matching vertex, create a supervertex of vertexA itself
+				if (!foundMatchingVertex)
+					supervertices.push(new Supervertex(vertexA, null, supervertices.length));
+			}
+
+			// Now loop over all created supervertices, and connect
+			//  all supervertices with each other
+			for (var i = 0, supervertex; supervertex = supervertices[i]; i++)
+			{
+				// First look at the left side
+				for (var j = 0, neighbor; neighbor = supervertex.left.adj[j]; j++) 
+				{
+					// Make sure we don't connect supervertex.left and supervertex.right
+					if(neighbor.supervertex.id === supervertex.id)
+						continue;
+
+					// Make sure we don't connect the neighbor multiple times
+					if(supervertex.adj.indexOf(neighbor.supervertex) !== -1)
+						continue;
+
+					supervertex.adj.push(neighbor.supervertex);
+				}
+
+				// Do the same, but now at the right side of the supervertex
+				if (supervertex.right) {
+					for (var j = 0, neighbor; neighbor = supervertex.right.adj[j]; j++) {
+
+						if(neighbor.supervertex.id === supervertex.id)
+							continue;
+
+						if(supervertex.adj.indexOf(neighbor.supervertex) !== -1)
+							continue
+
+						supervertex.adj.push(neighbor.supervertex);
+					}
+				}
+			}
+
+			// Check for an arbitrary parameter to see if our collection doesn't turn sour
+			if (supervertices.length / vertices.length > 0.8)
+				return { vertices: supervertices, depth: depth + 1 };
+
+			vertices = supervertices;
+		}
+
+		return { supervertices: vertices, maxdepth: depth };
+	}
+
 	var toGraph = function(vertices)
 	{
 		nodes = [];
 		edges = [];
+
 		for (var i = 0, vertex; vertex = vertices[i]; i++)
 		{
 			nodes[vertex.id] = {
@@ -171,6 +234,8 @@
 	    			size: 1,
 					color: '#ccc'
 	    		});
+	    		
+	    		// Clear the entry of the current vertex in the adjacency list of the neighbor
 	    		neighbor.adj[neighbor.adj.indexOf(vertex)] = null;
 		    }
 
@@ -181,23 +246,33 @@
 
 	var force = function(vertices, s, l, r, c)
 	{
-		var length = vertices.length;
+		// s: stiffness of the edges
+		// l: optimum distance between vertices (also A LIE)
+		// r: repulsion between vertices
+		// c: some constant
+
+		var verticeAmount = vertices.length;
 		var displacement = [];
-		for (var i = 0; i < length; i++)
+
+		// For each vertex, create a (null) displacement
+		for (var i = 0; i < verticeAmount; i++)
 			displacement[i] = { x: 0, y: 0 };
 		
-		for (var i = 0; i < length; i++)
+
+		for (var i = 0; i < verticeAmount; i++)
 		{
-			var u = vertices[i];
+			var vertexA = vertices[i];
 
-			// Repulsion
-			for (var j = i + 1; j < length; j++)
+			// Calculate the repulsion between vertices
+			for (var j = i + 1; j < verticeAmount; j++)
 			{
-				var v = vertices[j];
+				var vertexB = vertices[j];
 
-				var d = distance(u, v);
-				var dx = u.x - v.x;
-				var dy = u.y - v.y;
+				var d = distance(vertexA, vertexB);
+				var dx = vertexA.x - vertexB.x;
+				var dy = vertexA.y - vertexB.y;
+				
+				// Make sure we don't get a division by zero
 				if (d === 0)
 				{
 					d = 0.1;
@@ -205,47 +280,46 @@
 					dy = Math.random() * d;
 				}
 
-				var rX = r * dx / (d * d * d);
-				var rY = r * dy / (d * d * d);
+				// repulsion = constant * deltaPosition / distance^3
+				var repulsionX = r * dx / (d * d * d);
+				var repulsionY = r * dy / (d * d * d);
 
-				displacement[i].x += rX;
-				displacement[i].y += rY;
-				displacement[j].x -= rX;
-				displacement[j].y -= rY;
+				displacement[i].x += repulsionX;
+				displacement[i].y += repulsionY;
+				displacement[j].x -= repulsionX;
+				displacement[j].y -= repulsionY;
 			}
 
-			// Attraction
-			for (var k = 0, v; v = u.adj[k]; k++)
+			// Calculate the attraction between neigbors
+			for (var k = 0, neighbor; neighbor = vertexA.adj[k]; k++)
 			{
-				var d = distance(u, v);
-				var dx = u.x - v.x;
-				var dy = u.y - v.y;
+				var d = distance(vertexA, neighbor);
+				var dx = vertexA.x - neighbor.x;
+				var dy = vertexA.y - neighbor.y;
 			
+				// Don't attract if we're on top of each other anyway
 				if (d === 0)
-				{
-					d = 0.1;
-					dx = Math.random() * d;
-					dy = Math.random() * d;
-				}
+					continue;
 
-				var aX = s * (d - l) * dx / d;
-				var aY = s * (d - l) * dy / d;
+				// attraction = constant * (distance - constant) * deltaDistance / distance
+				var attractionX = s * (d - l) * dx / d;
+				var attractionY = s * (d - l) * dy / d;
 
-				displacement[i].x += aX;
-				displacement[i].y += aY;
+				displacement[i].x += attractionX;
+				displacement[i].y += attractionY;
 			}
 		}
 
 		// Apply displacement
 		var change = 0;
-		for (var i = 0; i < displacement.length; i++)
+		
+		for (var i = 0; i < verticeAmount; i++)
 		{
-			var disp = displacement[i];
-			var vertex = vertices[i];
-			vertex.x += c * disp.x;
-			vertex.y += c * disp.y;
+			vertices[i].x += c * displacement[i].x;
+			vertices[i].y += c * displacement[i].y;
 
-			change += disp.x * disp.x + disp.y * disp.y;
+			// The change is the square of the displacement on both axes
+			change += displacement[i].x * displacement[i].x + displacement[i].y * displacement[i].y;
 		}
 
 		return change;
