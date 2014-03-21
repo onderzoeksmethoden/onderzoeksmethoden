@@ -15,6 +15,7 @@ var init = function()
 	var start = function()
 	{
 		var graph = multistage.createLayout(initialGraph.nodes, initialGraph.edges);
+
 		gr.graph.clear();
 		gr.refresh();
 		gr = new sigma(
@@ -23,6 +24,7 @@ var init = function()
 			container : 'container'
 		});
 		console.log(graph);
+        console.log(Analyzer.Analyze(graph));        
 	}
 
 	// Add animation button
