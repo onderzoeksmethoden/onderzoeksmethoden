@@ -2,12 +2,8 @@ window.forceDebug = true;
 
 var init = function()
 {
-	// Graph
-	var nodes = 200,
-		density = 0.0025;
-
 	// Initialize the graph
-	var initialGraph = generator.generateSierpinskiGraph(4, '#666', 1, '#ccc', 1);
+	var initialGraph = generator.generateSierpinskiGraph(6, '#666', 1, '#ccc', 1);
 
 	// Other graph layouts:
 	//generator.generateSquareGrid(10, 10, '#666', 1, '#ccc', 1);
@@ -16,7 +12,8 @@ var init = function()
 	var sigmaGraph = new sigma(
 	{
 		graph: initialGraph, 
-		container : 'container'
+		container : 'container',
+		settings: {maxNodeSize: 1},
 	});
 
 	var start = function()
@@ -29,7 +26,8 @@ var init = function()
 		sigmaGraph = new sigma(
 		{ 
 			graph: graph, 
-			container : 'container'
+			container : 'container',
+			settings: {maxNodeSize: 1},
 		});
 
 		if(window.forceDebug) 

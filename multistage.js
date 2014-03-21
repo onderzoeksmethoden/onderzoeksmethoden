@@ -1,3 +1,14 @@
+// TODO:
+// - Roel: Get moar graphs in addition to sierpinski
+//  	* Maybe other then 'geometrically' generated graphs, some real world shit
+//		* Maybe a molecule
+// - Tomas: Generalize the code so that normal FD and collapsed FD can be used more easily
+// - Tomas Pull out the parameters to the FD algorithm and put them in a config
+// - Jelle W.: Further build the analyser
+// - Jelle H.: Show up for once
+//
+// (- For moar beauty, try to display the graph at each uncollapse level at collapsed FD)
+
 (function(multistage)
 {
 	// Input: A list of nodes and a list of edges
