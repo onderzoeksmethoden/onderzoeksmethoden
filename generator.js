@@ -25,25 +25,105 @@
 		this.size = size;
 	}
 
-	// TODO: Refactor
-	// generator.generateSquareGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
-	// {
-	// 	var graph = new Graph();
-	// 	for (var y = 0; y < height; y++)
-	// 		for (var x = 0; x < width; x++)
-	// 		{
-	// 			var index = y * width + x;
-	// 			var node = new Node(index, nodecolor, nodesize, x / width, y / height);
-	// 			graph.nodes.push(node);
+	generator.generateSquareGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
 
-	// 			if (x > 0)
-	// 				graph.edges.push(new Edge(graph.edges.length, index, index - 1, edgecolor, edgesize));
-	// 			if (y > 0)
-	// 				graph.edges.push(new Edge(graph.edges.length, index, index - width, edgecolor, edgesize));
-	// 		}
+		for (var y = 0; y < height; y++)
+			for (var x = 0; x < width; x++)
+			{
+				// Create a node at each (x, y) position in the grid
+				var index = y * width + x;
+				var node = new Node(index, nodecolor, nodesize, x / width, y / height);
+				graph.nodes.push(node);
 
-	// 	return graph;
-	// }
+				// Connect the node to its left and top neighbor, if possible
+				if (x > 0)
+					graph.edges.push(new Edge(graph.edges.length, index, index - 1, edgecolor, edgesize));
+				if (y > 0)
+					graph.edges.push(new Edge(graph.edges.length, index, index - width, edgecolor, edgesize));
+			}
+
+		return graph;
+	}
+
+	generator.generateTriangleGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
+
+		for (var y = 0; y < height; y++)
+			for (var x = 0; x < width; x++)
+			{
+				// Create a node at each (x, y) position in the grid
+				var index = y * width + x;
+				var node = new Node(index, nodecolor, nodesize, x / width, y / height);
+				graph.nodes.push(node);
+
+				// Connect the node to its left, top and topleft neighbor, if possible
+				if (x > 0)
+					graph.edges.push(new Edge(graph.edges.length, index, index - 1, edgecolor, edgesize));
+				if (y > 0)
+					graph.edges.push(new Edge(graph.edges.length, index, index - width, edgecolor, edgesize));
+				if (x > 0 && y > 0)
+					graph.edges.push(new Edge(graph.edges.length, index, index - width - 1, edgecolor, edgesize));
+			}
+
+		return graph;
+	}
+
+	generator.generateHexagonalGrid = function(width, height, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
+
+		for (var y = 0; y <= height; y++)
+		{
+			var offset = 1/6;
+			for (var x = 0; x < width; x++)
+			{
+				// Create the topleft node
+				var id = graph.nodes.length;
+				graph.nodes.push(new Node(id, nodecolor, nodesize, (x + offset) / width, y / height));
+				// Connect it to its upper left neighbor
+				if (id - 2 * width >= 0)
+					graph.edges.push(new Edge(graph.edges.length, id, id - 2 * width, edgecolor, edgesize));
+
+				id = graph.nodes.length;
+				// Create the topright node
+				graph.nodes.push(new Node(id, nodecolor, nodesize, (x + 1/3 + offset) / width, y / height));
+				// Connect it to its left neighbor
+				graph.edges.push(new Edge(graph.edges.length, id, id - 1, edgecolor, edgesize));
+				// Connect it to its upper right neighbor
+				if (id - 2 * width >= 0)
+					graph.edges.push(new Edge(graph.edges.length, id, id - 2 * width, edgecolor, edgesize));
+			}
+
+			// No need to add more nodes when we reach the bottom row
+			if (y === height)
+				break;
+
+			for (var x = 0; x < width; x++)
+			{	
+				// Create the left node
+				var id = graph.nodes.length;
+				graph.nodes.push(new Node(id, nodecolor, nodesize, x / width, (y + 1/2) / height));
+				// Connect it to its left neighbor
+				if (x > 0)
+					graph.edges.push(new Edge(graph.edges.length, id, id - 1, edgecolor, edgesize));
+				// Connect it to its upper right neighbor
+				if (id - 2 * width >= 0)
+					graph.edges.push(new Edge(graph.edges.length, id, id - 2 * width, edgecolor, edgesize));
+
+				var id = graph.nodes.length;
+				// Create the right node
+				graph.nodes.push(new Node(id, nodecolor, nodesize, (x + 2/3) / width, (y + 1/2) / height));
+				// Connect it to its upper left neighbor
+				if (id - 2 * width >= 0)
+					graph.edges.push(new Edge(graph.edges.length, id, id - 2 * width, edgecolor, edgesize));
+			}
+		}
+
+		return graph;
+	}
 
 	generator.generateSierpinskiGraph = function(maxDepth, nodecolor, nodesize, edgecolor, edgesize)
 	{
