@@ -184,6 +184,69 @@
 		return graph;
 	}
 
+	generator.generateTree = function(maxDepth, branchingFactor, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
+
+		// Add the root node
+		graph.nodes.push(new Node(0, nodecolor, nodesize, 1/2, 0));
+
+		for (var depth = 1; depth <= maxDepth; depth++)
+		{
+			var nodeAmount = Math.pow(branchingFactor, depth);
+			for (var depthIndex = 0; depthIndex < nodeAmount; depthIndex++)
+			{
+				// Create the node
+				var id = graph.nodes.length;
+				graph.nodes.push(new Node(id, nodecolor, nodesize, (depthIndex + 1) / (nodeAmount + 1), depth / maxDepth));
+				// Connect the node to its parent
+				graph.edges.push(new Edge(graph.edges.length, id, Math.floor((id - 1) / branchingFactor), edgecolor, edgesize));
+			}
+		}
+
+		return graph;
+	}
+
+	generator.generatePolygon = function(sides, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
+
+		for (var index = 0; index < sides; index++)
+		{
+			var angle = (index / sides) * 2 * Math.PI;
+			// Create the node
+			graph.nodes.push(new Node(index, nodecolor, nodesize, (1 + Math.cos(angle)) / 2, (1 + Math.sin(angle)) / 2));
+			// Connect it to its next neigbor
+			graph.edges.push(new Edge(index, index, (index + 1) % sides, edgecolor, edgesize));
+		}
+
+		return graph;
+	}
+
+	generator.generateFatPolygon = function(sides, maxDepth, branchingFactor, nodecolor, nodesize, edgecolor, edgesize)
+	{
+		var graph = new Graph();
+
+		for (var depth = 0; depth <= maxDepth; depth++)
+		{
+			var nodeAmount = sides * Math.pow(branchingFactor, depth);
+			var radius = (depth + 1) / (2 * (maxDepth + 1));
+
+			for (var index = 0; index < nodeAmount; index++)
+			{
+				var angle = ((index + 1/2) / nodeAmount) * 2 * Math.PI;
+				var id = graph.nodes.length;
+
+				graph.nodes.push(new Node(id, nodecolor, nodesize, radius * Math.cos(angle) + 1/2, radius * Math.sin(angle) + 1/2));
+				graph.edges.push(new Edge(graph.edges.length, id, id - index + ((index + 1) % nodeAmount), edgecolor, edgesize));
+				if (depth > 0)
+					graph.edges.push(new Edge(graph.edges.length, id, Math.floor((id - sides) / branchingFactor), edgecolor, edgesize));
+			}
+		}
+
+		return graph;
+	}
+
 	// generator.randomize = function(graph)
 	// {
 	// 	for (var i = 0, node; node = graph.nodes[i]; i++)

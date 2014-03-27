@@ -206,8 +206,8 @@
 			}
 
 			// Check for an arbitrary parameter to see if our collection doesn't turn sour
-			if (supervertices.length / vertices.length > 0.8)
-				return { vertices: supervertices, depth: depth + 1 };
+			//if (supervertices.length / vertices.length > 0.8)
+			//	return { supervertices: supervertices, depth: depth + 1 };
 
 			vertices = supervertices;
 		}
