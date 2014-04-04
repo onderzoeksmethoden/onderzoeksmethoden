@@ -83,6 +83,13 @@
 			return minAngle;
 		}
 
+		Analyzer.prototype._getPointsDistance = function(pointOne, pointTwo) {
+			var firstSide = pointTwo.x - pointOne.x;
+			var secondSide = pointTwo.y - pointTwo.y;
+
+			return Math.sqrt(firstSide * firstSide + secondSide * secondSide);
+		}
+
 		// --- Public functions ---
 		Analyzer.prototype.getCrossingsAmount = function(graph)
 		{
@@ -115,18 +122,47 @@
 			}
 
 			return {nodeAngles: nodeAngles, globalMinAngle: globalMinAngle};
-		}   
+		}
+
+		Analyzer.prototype.getEdgeLengths = function() {
+			var edgeLengths = [];
+
+			for(var i = 0; i < this.edges.length; ++i) {
+				var pointOne = this.nodes[ this.edges[i].source ];
+				var pointTwo = this.nodes[ this.edges[i].target ];
+
+				edgeLengths.push( this._getPointsDistance(pointOne, pointTwo) );
+			}
+
+			return edgeLengths;
+		}
+
+		Analyzer.prototype.getNodeDistances = function() {
+			var nodeDistances = []
+
+			for(var i = 0; i < this.nodes.length; ++i) {
+				for(var j = i + 1; j < this.nodes.length; ++j) {
+					nodeDistances.push( this._getPointsDistance(this.nodes[i], this.nodes[j]) );
+				}
+			}
+
+			return nodeDistances;
+		}
 
 		Analyzer.prototype.analyze = function()
 		{
 			return {
-				crossing_edges: this.getCrossingsAmount(),
+				crossingsAmount: this.getCrossingsAmount(),
 				// symmetry: this.getSymmetry(),
-				min_angle: this.getMinAngle(),
+				minAngle: this.getMinAngle(),
+				edgeLengths: this.getEdgeLengths(),
+				nodeDistances: this.getNodeDistances(),
 				// max_edge_orthogonality: this.getMaxEdgeOrthogonality(),
 				// max_node_orthogonality: this.getMaxNodeOrthogonality()
 			}
 		}
+
+
 
 		window.Analyzer = Analyzer;
 		return Analyzer;
