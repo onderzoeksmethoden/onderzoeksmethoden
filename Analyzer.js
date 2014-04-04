@@ -1,121 +1,136 @@
-var Analyzer = {}
+(function() {
 
-Analyzer.getCrossings = function(graph)
-{
-	var edges = graph.edges
-    var n = edges.length;
-    var nodes = graph.nodes
+	var Analyzer = (function() {
 
-    var doCross = function(e1, e2)
-    {
-        var x1 = nodes[e1.source].x
-        var y1 = nodes[e1.source].y
-        var x2 = nodes[e1.target].x
-        var y2 = nodes[e1.target].y
-        var x3 = nodes[e2.source].x
-        var y3 = nodes[e2.source].y
-        var x4 = nodes[e2.target].x
-        var y4 = nodes[e2.target].y
-        
-        var denomTerm = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+		function Analyzer(graph) {
+			this.graph = graph;
+			this.nodes = graph.nodes;
+			this.edges = graph.edges;
+		}
 
-        if(denomTerm == 0) // paralel
-            return false
-        else
-        {
-            Px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4))/denomTerm
-            Py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))/denomTerm
+		// --- Private functions --
 
-            if(Px >= Math.min(x1, x2, x3, x3) && Px <= Math.max(x1,x2,x3,x4)
-            && Py >= Math.min(y1, y2, y3, y3) && Py <= Math.max(y1,y2,y3,y4))
-                return true
+		Analyzer.prototype._checkIfEdgesCross = function(e1, e2) { 
 
-            return false
-        }
-    }
+			if(e1.source == e2.source || e1.source == e2.target || 
+				e1.target == e2.source || e1.target == e2.target) {
+				return false;
+			}
 
-    var nCrossings = 0;
-	for(var i = 0; i < n; i++)
-        for(var j = i+1; j < n; j++)
-            if(doCross(edges[i], edges[j]))
-                nCrossings++
+			var p0_x = nodes[e1.source].x;
+			var p0_y = nodes[e1.source].y;
+			var p1_x = nodes[e1.target].x;
+			var p1_y = nodes[e1.target].y;
 
-    return nCrossings
-}
+			var p2_x = nodes[e2.source].x;
+			var p2_y = nodes[e2.source].y;
+			var p3_x = nodes[e2.target].x;
+			var p3_y = nodes[e2.target].y;
 
-Analyzer.GetSymmetry = function(graph)
-{
+			var s1_x, s1_y, s2_x, s2_y;
+			s1_x = p1_x - p0_x;
+			s1_y = p1_y - p0_y;
+			s2_x = p3_x - p2_x;
+			s2_y = p3_y - p2_y;
 
-}
+			var s, t;
 
-Analyzer.getMinAngle  = function(graph)
-{
-    var nodes = graph.nodes
-    var edges = graph.edges
+			s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+			t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
 
-    var getEdges = function(node)
-    {
-        var n = edges.length
-        var es = []
-        for(var i = 0; i < n; i++)
-        {
-            if(edges[i].source == node.id || edges[i].target == node.id)
-                es.push(edges[i])
-        }
-        return es
-    }
+			if (s >= 0 && s <= 1 && t >= 0 && t <= 1) { 
+				return true;
+			} 
 
-    var getAngle = function(line1, line2)
-    {
-        var angle1 = Math.atan2(parseInt(line1.p1.y) - parseInt(line1.p2.y), parseInt(line1.p1.x) - parseInt(line1.p2.x))
-        var angle2 = Math.atan2(parseInt(line2.p1.y) - parseInt(line2.p2.y), parseInt(line2.p1.x) - parseInt(line2.p2.x))
+			return false;
+		}
 
-        if(angle1 - angle2 == 0)
-        {
-            console.log(line1)
-            console.log(line2)
-            console.log("--")
-        }
+		Analyzer.prototype._getNeighbourNodes = function(node)
+		{
+			var neighbourNodes = [];
 
-        return Math.abs(angle1 - angle2);
-    }
+			for(var i = 0; i < this.edges.length; i++) {
+				
+				if(this.edges[i].source == node.id) {
+					neighbourNodes.push( this.nodes[this.edges[i].target] );
+				} else if(edges[i].target == node.id) {
+					neighbourNodes.push( this.nodes[this.edges[i].source] );
+				}
 
-    var getSingleMinAngle = function(nodeEdges)
-    {   
-        var minAngle= Number.MAX_VALUE
-        var n = nodeEdges.length;
-        if(n > 0)
-            for(var i = 0; i < n; i++)
-                for(var j = i+1; j < n; j++)
-                {
-                    minAngle = Math.min(minAngle, getAngle({
-                        p1 : nodes[nodeEdges[i].source],
-                        p2 : nodes[nodeEdges[i].target]
-                    }, {
-                        p1 : nodes[nodeEdges[j].source],
-                        p2 : nodes[nodeEdges[j].target]
-                    }))
-                }
-        return minAngle
-    }
+			}
 
-    var n = nodes.length
-    var minAngle = Number.MAX_VALUE
-    for(var i = 0; i < n; i++)
-    {
-        minAngle = Math.min(minAngle, getSingleMinAngle(getEdges(nodes[i])))       
-    }
+			return neighbourNodes;
+		}
 
-    return minAngle
-}   
+		Analyzer.prototype._getSingleMinAngle = function(node)
+		{
+			var neighbourNodes = this._getNeighbourNodes(node);
+			var minAngle = Number.MAX_VALUE;
 
-Analyzer.Analyze = function(graph)
-{
-	return {
-		crossing_edges: Analyzer.getCrossings(graph),
-		// symmetry: Analyzer.getSymmetry(graph),
-		min_angle: Analyzer.getMinAngle(graph),
-		// max_edge_orthogonality: Analyzer.getMaxEdgeOrthogonality(graph),
-		// max_node_orthogonality: Analyzer.getMaxNodeOrthogonality(graph)
-	}
-}
+			for(var i = 0; i < neighbourNodes.length; ++i) {
+				for(var j = i + 1; j < neighbourNodes.length; ++j) {
+
+					var angle1 = Math.atan2(node.y - neighbourNodes[i].y, node.x - neighbourNodes[i].x);
+					var angle2 = Math.atan2(node.y - neighbourNodes[j].y, node.x - neighbourNodes[j].x);
+
+					var angleDifference = Math.abs(angle1 - angle2);
+					var currentAngle = Math.min( angleDifference, 2 * Math.PI - angleDifference);
+
+					var minAngle = Math.min(minAngle, currentAngle);
+				}
+			}
+
+			return minAngle;
+		}
+
+		// --- Public functions ---
+		Analyzer.prototype.getCrossingsAmount = function(graph)
+		{
+			var crossingsAmount = 0;
+
+			for(var i = 0; i < this.edges.length; i++) {
+				for(var j = i + 1; j < this.edges.length; j++) {
+					
+					if(this._checkIfEdgesCross(this.edges[i], this.edges[j])) {
+						crossingsAmount += 1;
+					}
+
+				}
+			}
+
+			return crossingsAmount;
+		}
+
+		Analyzer.prototype.getMinAngle = function()
+		{
+			var nodeAngles = [];
+			var globalMinAngle = Number.MAX_VALUE;
+
+			for(var i = 0; i < this.nodes.length; i++)
+			{
+				var currentMinAngle = this._getSingleMinAngle(this.nodes[i]);
+				
+				nodeAngles.push(currentMinAngle);
+				globalMinAngle = Math.min(globalMinAngle, currentMinAngle);
+			}
+
+			return {nodeAngles: nodeAngles, globalMinAngle: globalMinAngle};
+		}   
+
+		Analyzer.prototype.analyze = function()
+		{
+			return {
+				crossing_edges: this.getCrossingsAmount(),
+				// symmetry: this.getSymmetry(),
+				min_angle: this.getMinAngle(),
+				// max_edge_orthogonality: this.getMaxEdgeOrthogonality(),
+				// max_node_orthogonality: this.getMaxNodeOrthogonality()
+			}
+		}
+
+		window.Analyzer = Analyzer;
+		return Analyzer;
+
+	})();
+
+}).call(this);

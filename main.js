@@ -3,7 +3,7 @@ window.forceDebug = true;
 var init = function()
 {
 	// Initialize the graph
-	var initialGraph = generator.generateSierpinskiGraph(6, '#666', 1, '#ccc', 1);
+	var initialGraph = generator.generateSierpinskiGraph(4, '#666', 1, '#ccc', 1);
 
 	// Other graph layouts:
 	//generator.generateSquareGrid(10, 10, '#666', 1, '#ccc', 1);
@@ -13,12 +13,13 @@ var init = function()
 	{
 		graph: initialGraph, 
 		container : 'container',
-		settings: {maxNodeSize: 1},
+		settings: {maxNodeSize: 8},
 	});
 
 	var start = function()
 	{
 		var graph = multistage.createLayout(initialGraph.nodes, initialGraph.edges);
+		window.stupidgraph = graph;
 
 		sigmaGraph.graph.clear();
 		sigmaGraph.refresh();
@@ -27,13 +28,15 @@ var init = function()
 		{ 
 			graph: graph, 
 			container : 'container',
-			settings: {maxNodeSize: 1},
+			settings: {maxNodeSize: 8},
 		});
 
 		if(window.forceDebug) 
 		{
 			console.log(graph);
-			console.log(Analyzer.Analyze(graph));
+
+			analyzer = new window.Analyzer(graph);
+			console.log(analyzer.analyze());
 		}
 	}
 
