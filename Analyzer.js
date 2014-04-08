@@ -2,10 +2,11 @@
 
 	var Analyzer = (function() {
 
-		function Analyzer(graph) {
+		function Analyzer(graph, parameters) {
 			this.graph = graph;
 			this.nodes = graph.nodes;
 			this.edges = graph.edges;
+            this.graphParameters = parameters
 		}
 
 		// --- Private functions --
@@ -90,6 +91,10 @@
 			return Math.sqrt(firstSide * firstSide + secondSide * secondSide);
 		}
 
+        Analyzer.prototype._getEdgeLength = function(edge){
+            return this._getPointsDistance(this.nodes[edge.source], this.nodes[edge.target])
+        }
+
 		// --- Public functions ---
 		Analyzer.prototype.getCrossingsAmount = function(graph)
 		{
@@ -137,6 +142,31 @@
 			return edgeLengths;
 		}
 
+        Analyzer.prototype.getMinNodeDistance = function() {
+            var minNodeDistance = Number.MAX_VALUE
+            var distances = []
+
+            for(var i = 0; i < this.nodes.length; ++i) {
+                for(var j = i + 1; j < this.nodes.length; ++j) {
+                    var d = this._getPointsDistance(this.nodes[i], this.nodes[j]);
+                    distances.push(d)
+                    minNodeDistance = Math.min(minNodeDistance, d)
+                }
+            }
+
+            return {globalMinNodeDistance: minNodeDistance, dists: distances};
+        }
+
+        Analyzer.prototype.getDiffEdgeLength = function(k){
+            var lengths = []
+            for(var i = 0; i < this.edges.length; ++i)
+                lengths.push(this._getEdgeLength(this.edges[i]));
+            
+            averageLength = lengths.reduce(function(pv, cv){ return pv + cv}, 0) / lengths.length;
+
+            return Math.abs(k - averageLength)
+        }
+
 		Analyzer.prototype.getNodeDistances = function() {
 			var nodeDistances = []
 
@@ -153,12 +183,9 @@
 		{
 			return {
 				crossingsAmount: this.getCrossingsAmount(),
-				// symmetry: this.getSymmetry(),
 				minAngle: this.getMinAngle(),
-				edgeLengths: this.getEdgeLengths(),
-				nodeDistances: this.getNodeDistances(),
-				// max_edge_orthogonality: this.getMaxEdgeOrthogonality(),
-				// max_node_orthogonality: this.getMaxNodeOrthogonality()
+                minNodeDistance: this.getMinNodeDistance(),
+                diffEdgeLength: this.getDiffEdgeLength(this.graphParameters.k)
 			}
 		}
 
