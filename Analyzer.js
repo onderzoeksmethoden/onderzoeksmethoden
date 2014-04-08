@@ -1,6 +1,6 @@
 (function() {
 
-	var Analyzer = (function() {
+	window.Analyzer = (function() {
 
 		function Analyzer(graph, parameters) {
 			this.graph = graph;
@@ -16,8 +16,7 @@
 
 				iterations: graph.iterations,
 			}
-
-			
+		
 		}
 
 		// --- Private functions --
@@ -29,15 +28,15 @@
 				return false;
 			}
 
-			var p0_x = nodes[e1.source].x;
-			var p0_y = nodes[e1.source].y;
-			var p1_x = nodes[e1.target].x;
-			var p1_y = nodes[e1.target].y;
+			var p0_x = this.nodes[e1.source].x;
+			var p0_y = this.nodes[e1.source].y;
+			var p1_x = this.nodes[e1.target].x;
+			var p1_y = this.nodes[e1.target].y;
 
-			var p2_x = nodes[e2.source].x;
-			var p2_y = nodes[e2.source].y;
-			var p3_x = nodes[e2.target].x;
-			var p3_y = nodes[e2.target].y;
+			var p2_x = this.nodes[e2.source].x;
+			var p2_y = this.nodes[e2.source].y;
+			var p3_x = this.nodes[e2.target].x;
+			var p3_y = this.nodes[e2.target].y;
 
 			var s1_x, s1_y, s2_x, s2_y;
 			s1_x = p1_x - p0_x;
@@ -65,7 +64,7 @@
 				
 				if(this.edges[i].source == node.id) {
 					neighbourNodes.push( this.nodes[this.edges[i].target] );
-				} else if(edges[i].target == node.id) {
+				} else if(this.edges[i].target == node.id) {
 					neighbourNodes.push( this.nodes[this.edges[i].source] );
 				}
 
@@ -190,9 +189,8 @@
 			return nodeDistances;
 		}
 
-		window.Analyzer = Analyzer;
 		return Analyzer;
 
 	})();
 
-}).call(this);
+})();

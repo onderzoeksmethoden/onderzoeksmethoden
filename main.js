@@ -50,7 +50,7 @@ var init = function()
 		// var graph = graphs[graph_name];
 		// generator.randomize(graph);
 
-		graph = createRandomGraph(50, 8, 100, 100)
+		graph = createRandomGraph(50, 8, 50, 50)
 
 		for(var a = 0; a < amount_of_tests; ++a) {
 

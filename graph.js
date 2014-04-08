@@ -19,7 +19,7 @@ var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
             color: '#666'
         });
         
-        var nEdges = Math.floor(Math.random() * maxNEdgesPerNode) + 1
+        var nEdges = Math.floor(Math.sqrt(Math.floor(Math.random() * maxNEdgesPerNode * maxNEdgesPerNode) + 1))
         for(var j = 0; j < nEdges; j++)
         {
             var nodeId = (Math.floor(Math.random() * numberOfNodes)).toString()
