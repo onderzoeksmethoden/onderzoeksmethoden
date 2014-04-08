@@ -6,17 +6,18 @@
 			this.graph = graph;
 			this.nodes = graph.nodes;
 			this.edges = graph.edges;
+			this.parameters = parameters
 
 			this.result = {
 				crossingsAmount: this.getCrossingsAmount(),
 				minAngle: this.getMinAngle(),
 				minNodeDistance: this.getMinNodeDistance(),
-				diffEdgeLength: this.getDiffEdgeLength(this.graphParameters.k)
+				diffEdgeLength: this.getDiffEdgeLength(this.parameters.k),
 
 				iterations: graph.iterations,
 			}
 
-			this.graphParameters = parameters
+			
 		}
 
 		// --- Private functions --

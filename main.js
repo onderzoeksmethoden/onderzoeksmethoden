@@ -22,8 +22,8 @@ var init = function()
 			var regular_graph = multistage.createLayoutRegular(graph.nodes, graph.edges);
 			var multistage_graph = multistage.createLayout(graph.nodes, graph.edges);
 
-			var regular_analysis = new window.Analyzer(regular_graph).result;
-			var multistage_analysis = new window.Analyzer(multistage_graph).result;
+			var regular_analysis = new window.Analyzer(regular_graph, {k: 0.1543033499620919}).result;
+			var multistage_analysis = new window.Analyzer(multistage_graph, {k: 0.1543033499620919}).result;
 
 			console.log(regular_analysis);
 			console.log(multistage_analysis);
