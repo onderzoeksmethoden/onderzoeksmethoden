@@ -13,9 +13,11 @@ var init = function()
 
 	// Main
 	for(var graph_name in graphs) {
-		graph = graphs[graph_name];
+		// graph = graphs[graph_name];
 
-		generator.randomize(graph);
+		// generator.randomize(graph);
+
+		graph = createRandomGraph(50, 8, 100, 100)
 
 		for(var a = 0; a < amount_of_tests; ++a) {
 
