@@ -2,17 +2,16 @@
 
 	window.Analyzer = (function() {
 
-		function Analyzer(graph, parameters) {
+		function Analyzer(graph) {
 			this.graph = graph;
 			this.nodes = graph.nodes;
 			this.edges = graph.edges;
-			this.parameters = parameters
 
 			this.result = {
 				crossingsAmount: this.getCrossingsAmount(),
 				minAngle: this.getMinAngle(),
 				minNodeDistance: this.getMinNodeDistance(),
-				diffEdgeLength: this.getDiffEdgeLength(this.parameters.k),
+				diffEdgeLength: this.getDiffEdgeLength(),
 
 				iterations: graph.iterations,
 			}
@@ -136,7 +135,7 @@
 				globalMinAngle = Math.min(globalMinAngle, currentMinAngle);
 			}
 
-			return {nodeAngles: nodeAngles, globalMinAngle: globalMinAngle};
+			return globalMinAngle;
 		}
 
 		Analyzer.prototype.getEdgeLengths = function() {
@@ -153,32 +152,33 @@
 		}
 
 		Analyzer.prototype.getMinNodeDistance = function() {
-			var minNodeDistance = Number.MAX_VALUE
-			var distances = []
+			var minNodeDistance = Number.MAX_VALUE;
+			var distances = [];
 
 			for(var i = 0; i < this.nodes.length; ++i) {
 				for(var j = i + 1; j < this.nodes.length; ++j) {
 					var d = this._getPointsDistance(this.nodes[i], this.nodes[j]);
-					distances.push(d)
-					minNodeDistance = Math.min(minNodeDistance, d)
+					distances.push(d);
+					minNodeDistance = Math.min(minNodeDistance, d);
 				}
 			}
 
-			return {globalMinNodeDistance: minNodeDistance, dists: distances};
+			return minNodeDistance;
 		}
 
-		Analyzer.prototype.getDiffEdgeLength = function(k){
-			var lengths = []
+		Analyzer.prototype.getDiffEdgeLength = function(){
+			var lengths = [];
 			for(var i = 0; i < this.edges.length; ++i)
 				lengths.push(this._getEdgeLength(this.edges[i]));
 			
-			averageLength = lengths.reduce(function(pv, cv){ return pv + cv}, 0) / lengths.length;
+			averageLength = lengths.reduce(function(pv, cv){ return pv + cv}, 0) / this.edges.length;
 
-			return Math.abs(k - averageLength)
+			var k = 1 / Math.sqrt(this.nodes.length);
+			return Math.abs(k - averageLength);
 		}
 
 		Analyzer.prototype.getNodeDistances = function() {
-			var nodeDistances = []
+			var nodeDistances = [];
 
 			for(var i = 0; i < this.nodes.length; ++i) {
 				for(var j = i + 1; j < this.nodes.length; ++j) {

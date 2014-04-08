@@ -74,7 +74,7 @@
 				iterations++;
 				totalIterations++;
 
-				if(change <= stop) {
+				if(change <= stop || iterations >= 10000) {
 					break;
 				}
 			}
@@ -140,7 +140,7 @@
 			var change = force(vertices, s, l, r, c) / verticeAmount;
 			iterations++;
 
-			if(change <= stop) {
+			if(change <= stop || iterations >= 10000) {
 				break;
 			}
 		}
