@@ -3,30 +3,25 @@ window.forceDebug = true;
 $(function() {
 	init();
 
-	var currentContainer = 0;
-	var currentSigma = null;
+	var currentSigma = new sigma({
+		graph: {"edges": [], "nodes": []},
+		container: "container",
+		settings: {maxNodeSize: 8},
+	});
 
 	$("body button").click(function() {
 
-		if(currentSigma) {
-			currentSigma.kill();
-			$("#container" + currentContainer).remove();
-		}
+		var newGraph = $(this).data("graph");
 
-		currentContainer++;
+		currentSigma.graph.clear();
 
-		var graph = $(this).data("graph");
+		for(var a = 0; a < newGraph.nodes.length; ++a)
+			currentSigma.graph.addNode(newGraph.nodes[a]);
 
-		var container = $("<div></div>");
-		container.attr("id", "container" + currentContainer);
-		container.addClass("container");
-		$("body").append(container);
+		for(var a = 0; a < newGraph.edges.length; ++a)
+			currentSigma.graph.addEdge(newGraph.edges[a]);
 
-		currentSigma = new sigma({
-			graph: graph,
-			container: container[0],
-			settings: {maxNodeSize: 8},
-		});
+		currentSigma.refresh();
 
 		console.log($(this).data("analysis"));
 
@@ -62,12 +57,12 @@ var init = function()
 			var button_regular = $("<button>"+ graph_name +": regular "+ a +"</button>");
 			button_regular.data("graph", regular_graph);
 			button_regular.data("analysis", regular_analysis);
-			$("body").append(button_regular);
+			$("#buttoncontainer").append(button_regular);
 
 			var button_multistage = $("<button>"+ graph_name +": multistage "+ a +"</button>");
 			button_multistage.data("graph", multistage_graph);
 			button_multistage.data("analysis", multistage_analysis);
-			$("body").append(button_multistage);
+			$("#buttoncontainer").append(button_multistage);
 		}
 	}
 }
