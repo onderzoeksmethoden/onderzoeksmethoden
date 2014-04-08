@@ -6,6 +6,15 @@
 			this.graph = graph;
 			this.nodes = graph.nodes;
 			this.edges = graph.edges;
+
+			this.result = {
+				crossingsAmount: this.getCrossingsAmount(),
+				minAngle: this.getMinAngle(),
+				edgeLengths: this.getEdgeLengths(),
+				nodeDistances: this.getNodeDistances(),
+
+				iterations: graph.iterations,
+			}
 		}
 
 		// --- Private functions --
@@ -148,21 +157,6 @@
 
 			return nodeDistances;
 		}
-
-		Analyzer.prototype.analyze = function()
-		{
-			return {
-				crossingsAmount: this.getCrossingsAmount(),
-				// symmetry: this.getSymmetry(),
-				minAngle: this.getMinAngle(),
-				edgeLengths: this.getEdgeLengths(),
-				nodeDistances: this.getNodeDistances(),
-				// max_edge_orthogonality: this.getMaxEdgeOrthogonality(),
-				// max_node_orthogonality: this.getMaxNodeOrthogonality()
-			}
-		}
-
-
 
 		window.Analyzer = Analyzer;
 		return Analyzer;

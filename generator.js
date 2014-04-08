@@ -4,6 +4,8 @@
 	{
 		this.nodes = nodes || [];
 		this.edges = edges || [];
+		
+		this.iterations = null;
 	}
 
 	var Node = function(id, color, size, x, y)
@@ -247,14 +249,15 @@
 		return graph;
 	}
 
-	// generator.randomize = function(graph)
-	// {
-	// 	for (var i = 0, node; node = graph.nodes[i]; i++)
-	// 	{
-	// 		node.x = Math.random();
-	// 		nody.y = Math.random();
-	// 	}
-	// 	return graph;
-	// }
+	generator.randomize = function(graph)
+	{
+		for (var i = 0, node; node = graph.nodes[i]; i++)
+		{
+			node.x = Math.random();
+			node.y = Math.random();
+		}
+		
+		return graph;
+	}
 	
 }(window.generator = window.generator || {}))

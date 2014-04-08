@@ -21,7 +21,7 @@
 		var vertices = [];
 
 		for (var i = 0, node; node = nodes[i]; i++)
-			vertices.push({ id: node.id, adj: [], weight: 1 });
+			vertices.push({ id: node.id, adj: [], weight: 1, x: node.x, y: node.y });
 
 		for (var i = 0, edge; edge = edges[i]; i++)
 		{
@@ -109,7 +109,50 @@
 			console.log('We were done after ' + totalIterations + ' iterations');
 		
 		// Convert all our vertices to a graph
-		return toGraph(supervertices);
+		var resultGraph = toGraph(supervertices);
+		resultGraph.iterations = totalIterations;
+
+		return resultGraph;
+	}
+
+	multistage.createLayoutRegular = function(nodes, edges)
+	{
+		var vertices = toVertices(nodes, edges);
+		var verticeAmount = vertices.length;
+		
+		// k: spring constant
+		// s: stiffness of the edges
+		// l: optimum distance between vertices (also A LIE)
+		// r: repulsion between vertices
+		// c: some constant
+
+		var k = 1 / Math.sqrt(verticeAmount), // !
+			s = -1/k,
+			l = 0,
+			r = k * k,
+			c = 1 / (verticeAmount * Math.sqrt(verticeAmount)), // !
+			stop = c;
+
+		// Iteratively exectute the force-directed algorithm
+		var iterations = 0;
+		while(true) {
+			
+			var change = force(vertices, s, l, r, c) / verticeAmount;
+			iterations++;
+
+			if(change <= stop) {
+				break;
+			}
+		}
+
+		if(window.forceDebug)
+			console.log('We were done after ' + iterations + ' iterations');
+		
+		// Convert all our vertices to a graph
+		var resultGraph = toGraph(vertices);
+		resultGraph.iterations = iterations;
+
+		return resultGraph;
 	}
 
 	var Supervertex = function(left, right, id)
@@ -268,7 +311,6 @@
 		// For each vertex, create a (null) displacement
 		for (var i = 0; i < verticeAmount; i++)
 			displacement[i] = { x: 0, y: 0 };
-		
 
 		for (var i = 0; i < verticeAmount; i++)
 		{
