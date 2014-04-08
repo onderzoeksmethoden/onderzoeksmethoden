@@ -1,3 +1,45 @@
+var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
+{
+    var graph = {nodes: [], edges: []}
+
+    edges = []
+    for(var i = 0; i < numberOfNodes; i++)
+    {
+        var iId = i.toString()
+
+        if(edges[i] == undefined)
+            edges[i] = []
+
+        graph.nodes.push({
+            id: i.toString(),
+            label: i.toString(),
+            x: Math.floor(Math.random() * width),
+            y: Math.floor(Math.random() * height),
+            size: 1,
+            color: '#666'
+        });
+        
+        var nEdges = Math.floor(Math.sqrt(Math.floor(Math.random() * maxNEdgesPerNode * maxNEdgesPerNode) + 1))
+        for(var j = 0; j < nEdges; j++)
+        {
+            var nodeId = (Math.floor(Math.random() * numberOfNodes)).toString()
+            while(nodeId == iId || (edges[nodeId] !== undefined && iId in edges[nodeId]) || nodeId in edges[iId])
+            {
+                nodeId = Math.floor(Math.random() * numberOfNodes)
+            }
+
+            var edge = {source : iId, target : nodeId}
+            edge.id = i.toString();
+            edge.size = 1;
+            edge.color = '#ccc';
+            graph.edges.push(edge);
+
+            edges[i][nodeId] = true;
+        }
+    }
+    return graph;
+}
+
 var randomGraph = function(vertices, density, width, height)
 {
     // Clamp the density
