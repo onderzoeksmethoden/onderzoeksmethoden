@@ -260,8 +260,8 @@
 
 	var toGraph = function(vertices)
 	{
-		nodes = [];
-		edges = [];
+		var nodes = [];
+		var edges = [];
 
 		for (var i = 0, vertex; vertex = vertices[i]; i++)
 		{
@@ -277,7 +277,7 @@
 	        var length = vertex.adj.length;
 		    for (var j = 0; j < length; j++)
 		    {
-		    	neighbor = vertex.adj[j];
+		    	var neighbor = vertex.adj[j];
 		    	if (neighbor === null)
 		    		continue;
 
