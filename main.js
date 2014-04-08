@@ -66,7 +66,7 @@ var init_old = function()
 		{
 			console.log(graph);
 
-			analyzer = new window.Analyzer(graph);
+			analyzer = new window.Analyzer(graph, {k: 0.1543033499620919});
 			console.log(analyzer.analyze());
 		}
 	}
