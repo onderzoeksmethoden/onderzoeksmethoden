@@ -185,7 +185,8 @@
 			var visited = [];
 			
 			// TODO: Do we need this?
-			vertices.sort(function(a, b){ return a.weight - b.weight; });
+			//vertices.sort(function(a, b){ return a.weight - b.weight; });
+			vertices = shuffle(vertices);
 
 			// Loop across all vertices, and create supervertices
 			for (var i = 0, vertexA; vertexA = vertices[i]; i++)
@@ -257,6 +258,25 @@
 
 		return { supervertices: vertices, maxdepth: depth };
 	}
+
+	var shuffle = function(array) 
+	{
+	    var counter = array.length, result = array.slice(0), temp, index;
+
+	    // While there are elements in the array
+	    while (counter--) 
+	    {
+	        // Pick a random index
+	        index = Math.floor((Math.random() * counter));
+
+	        // And swap the last element with it
+	        temp = result[counter];
+	        result[counter] = result[index];
+	        result[index] = temp;
+	    }
+
+	    return result;
+	};
 
 	var toGraph = function(vertices)
 	{
