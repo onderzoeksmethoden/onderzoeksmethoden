@@ -174,7 +174,7 @@
 			averageLength = lengths.reduce(function(pv, cv){ return pv + cv}, 0) / this.edges.length;
 
 			var k = 1 / Math.sqrt(this.nodes.length);
-			return Math.abs(k - averageLength);
+			return averageLength;//Math.abs(k - averageLength);
 		}
 
 		Analyzer.prototype.getNodeDistances = function() {
