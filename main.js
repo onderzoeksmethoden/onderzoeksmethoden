@@ -1,32 +1,57 @@
 window.forceDebug = false;
 
 $(function() {
-	init();
+	demoInit();
 
+	return;
+
+	// ---
+
+	// var currentSigma = new sigma({
+	// 	graph: {"edges": [], "nodes": []},
+	// 	container: "container",
+	// 	settings: {maxNodeSize: 8},
+	// });
+
+	// $("body button").click(function() {
+
+	// 	var newGraph = $(this).data("graph");
+
+	// 	currentSigma.graph.clear();
+
+	// 	for(var a = 0; a < newGraph.nodes.length; ++a)
+	// 		currentSigma.graph.addNode(newGraph.nodes[a]);
+
+	// 	for(var a = 0; a < newGraph.edges.length; ++a)
+	// 		currentSigma.graph.addEdge(newGraph.edges[a]);
+
+	// 	currentSigma.refresh();
+
+	// 	console.log($(this).data("analysis"));
+
+	// });
+});
+
+var demoInit = function()
+{
+	// Generate the graph and randomize position
+	var currentGraph = createRandomGraph(12, 2, 50, 50);
+	generator.randomize(currentGraph);
+
+	console.log(currentGraph);
+
+	// Put it on screen
 	var currentSigma = new sigma({
-		graph: {"edges": [], "nodes": []},
+		graph: currentGraph,
 		container: "container",
 		settings: {maxNodeSize: 8},
 	});
 
-	$("body button").click(function() {
-
-		var newGraph = $(this).data("graph");
-
-		currentSigma.graph.clear();
-
-		for(var a = 0; a < newGraph.nodes.length; ++a)
-			currentSigma.graph.addNode(newGraph.nodes[a]);
-
-		for(var a = 0; a < newGraph.edges.length; ++a)
-			currentSigma.graph.addEdge(newGraph.edges[a]);
-
-		currentSigma.refresh();
-
-		console.log($(this).data("analysis"));
-
+	// Create the force-directed layout, and show it for every iteration
+	multistage.createLayoutRegular(graph.nodes, graph.edges, function(vertices) {
+		console.log(vertices);
 	});
-});
+}
 
 var init = function()
 {
@@ -50,7 +75,7 @@ var init = function()
 		"randomized23": createRandomGraph(120, 2, 50, 50),
 		"randomized24": createRandomGraph(120, 2, 50, 50),
 		"randomized25": createRandomGraph(120, 2, 50, 50),*/
-		"randomized11": createRandomGraph(120, 1, 50, 50),
+		//"randomized11": createRandomGraph(120, 1, 50, 50),
 		//"randomized12": createRandomGraph(120, 1, 50, 50),
 		//"randomized13": createRandomGraph(120, 1, 50, 50),
 		//"randomized14": createRandomGraph(120, 1, 50, 50),

@@ -115,7 +115,7 @@
 		return resultGraph;
 	}
 
-	multistage.createLayoutRegular = function(nodes, edges)
+	multistage.createLayoutRegular = function(nodes, edges, refreshFunction)
 	{
 		var vertices = toVertices(nodes, edges);
 		var verticeAmount = vertices.length;
@@ -143,6 +143,9 @@
 			if(change <= stop || iterations >= 10000) {
 				break;
 			}
+
+			if(updateFunction !== null)
+				updateFunction(vertices);
 		}
 
 		if(window.forceDebug)
