@@ -77,7 +77,7 @@
 				if(updateFunction !== null)
 					updateFunction(supervertices);
 
-				if(change <= stop || iterations >= 10000) {
+				if(change <= stop || iterations >= 20000) {
 					break;
 				}
 			}
@@ -146,7 +146,7 @@
 			if(updateFunction !== null)
 				updateFunction(vertices);
 
-			if(change <= stop || iterations >= 10000) {
+			if(change <= stop || iterations >= 20000) {
 				break;
 			}
 		}
