@@ -15,11 +15,11 @@ var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
         // Add a new node with random positions to the list
         graph.nodes.push({
             id: i.toString(),
-            label: i.toString(),
+            // label: i.toString(),
             x: Math.floor(Math.random() * width),
             y: Math.floor(Math.random() * height),
-            size: 1,
-            color: '#666'
+            // size: 1,
+            // color: '#666'
         });
         
         var nEdges = Math.floor(Math.sqrt(Math.floor(Math.random() * maxNEdgesPerNode * maxNEdgesPerNode) + 1));
