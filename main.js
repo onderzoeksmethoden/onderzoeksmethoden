@@ -75,7 +75,7 @@ var init = function()
 		"randomized23": createRandomGraph(120, 2, 50, 50),
 		"randomized24": createRandomGraph(120, 2, 50, 50),
 		"randomized25": createRandomGraph(120, 2, 50, 50),*/
-		//"randomized11": createRandomGraph(120, 1, 50, 50),
+		"randomized11": createRandomGraph(12, 1, 50, 50),
 		//"randomized12": createRandomGraph(120, 1, 50, 50),
 		//"randomized13": createRandomGraph(120, 1, 50, 50),
 		//"randomized14": createRandomGraph(120, 1, 50, 50),

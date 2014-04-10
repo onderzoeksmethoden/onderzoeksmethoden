@@ -1,15 +1,16 @@
 var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
 {
-    var graph = {nodes: [], edges: []}
+    var graph = {nodes: [], edges: []};
+    var edges = [];
 
-    edges = []
     for(var i = 0; i < numberOfNodes; i++)
     {
-        var iId = i.toString()
+        var iString = i.toString()
 
         if(edges[i] == undefined)
-            edges[i] = []
+            edges[i] = [];
 
+        // Add a new node with random positions to the list
         graph.nodes.push({
             id: i.toString(),
             label: i.toString(),
@@ -19,24 +20,27 @@ var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
             color: '#666'
         });
         
-        var nEdges = Math.floor(Math.sqrt(Math.floor(Math.random() * maxNEdgesPerNode * maxNEdgesPerNode) + 1))
+        var nEdges = Math.floor(Math.sqrt(Math.floor(Math.random() * maxNEdgesPerNode * maxNEdgesPerNode) + 1));
+
         for(var j = 0; j < nEdges; j++)
         {
-            var nodeId = (Math.floor(Math.random() * numberOfNodes)).toString()
-            while(nodeId == iId || (edges[nodeId] !== undefined && iId in edges[nodeId]) || nodeId in edges[iId])
-            {
-                nodeId = Math.floor(Math.random() * numberOfNodes)
-            }
+            var nodeId = (Math.floor(Math.random() * numberOfNodes)).toString();
+            
+            while(nodeId == iString || (edges[nodeId] !== undefined && iString in edges[nodeId]) || nodeId in edges[iString])
+                nodeId = Math.floor(Math.random() * numberOfNodes);
 
-            var edge = {source : iId, target : nodeId}
-            edge.id = i.toString();
-            edge.size = 1;
-            edge.color = '#ccc';
-            graph.edges.push(edge);
+            graph.edges.push({
+                source: iString,
+                target: nodeId,
+                id: iString,
+                size: 1,
+                color: '#ccc',
+            });
 
             edges[i][nodeId] = true;
         }
     }
+    
     return graph;
 }
 
