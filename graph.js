@@ -3,6 +3,8 @@ var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
     var graph = {nodes: [], edges: []};
     var edges = [];
 
+    var edgeId = 0;
+
     for(var i = 0; i < numberOfNodes; i++)
     {
         var iString = i.toString()
@@ -27,17 +29,18 @@ var createRandomGraph = function(numberOfNodes, maxNEdgesPerNode, width, height)
             var nodeId = (Math.floor(Math.random() * numberOfNodes)).toString();
             
             while(nodeId == iString || (edges[nodeId] !== undefined && iString in edges[nodeId]) || nodeId in edges[iString])
-                nodeId = Math.floor(Math.random() * numberOfNodes);
+                nodeId = Math.floor(Math.random() * numberOfNodes).toString();
 
             graph.edges.push({
                 source: iString,
                 target: nodeId,
-                id: iString,
+                id: edgeId.toString(),
                 size: 1,
                 color: '#ccc',
             });
 
             edges[i][nodeId] = true;
+            edgeId++;
         }
     }
     

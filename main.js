@@ -1,56 +1,113 @@
 window.forceDebug = false;
+var currentSigma = null;
 
 $(function() {
-	demoInit();
+
+	var graphs = {
+		"sierpinski_4": function() { return generator.generateSierpinskiGraph(4); }, 
+		"square_grid": function() { return generator.generateSquareGrid(11, 11); },
+		"hexagon_grid": function() { return generator.generateHexagonalGrid(5, 5); },
+		"tree": function() { return generator.generateTree(3, 4); },
+		"cylinder": function() { return generator.generateFatPolygon(8, 15, 1); },
+		"procedural1": function() { return generator.generateFatPolygon(4, 4, 2); },
+		"randomized21": function() { return createRandomGraph(120, 2, 50, 50); },
+	}
+
+	for(var graphName in graphs) {
+		$("#graphName").append('<option value="'+ graphName +'">'+ graphName +'</select>');
+	}
+
+	$("#generate").click(function() {
+		var graphName = $("#graphName").find(":selected").val();
+		var multistageEnabled = $("#multistageEnabled").is(':checked');
+		var updateTimeout = parseInt($("#updateTimeout").val());
+		var updateStep = parseInt($("#updateStep").val());
+
+		$("#container").empty();
+		runDemo(graphs[graphName](), multistageEnabled, updateTimeout, updateStep);
+	});
 
 	return;
-
-	// ---
-
-	// var currentSigma = new sigma({
-	// 	graph: {"edges": [], "nodes": []},
-	// 	container: "container",
-	// 	settings: {maxNodeSize: 8},
-	// });
-
-	// $("body button").click(function() {
-
-	// 	var newGraph = $(this).data("graph");
-
-	// 	currentSigma.graph.clear();
-
-	// 	for(var a = 0; a < newGraph.nodes.length; ++a)
-	// 		currentSigma.graph.addNode(newGraph.nodes[a]);
-
-	// 	for(var a = 0; a < newGraph.edges.length; ++a)
-	// 		currentSigma.graph.addEdge(newGraph.edges[a]);
-
-	// 	currentSigma.refresh();
-
-	// 	console.log($(this).data("analysis"));
-
-	// });
 });
 
-var demoInit = function()
+var runDemo = function(graph, multistageEnabled, updateTimeout, updateStep)
 {
-	// Generate the graph and randomize position
-	var currentGraph = createRandomGraph(12, 2, 50, 50);
-	generator.randomize(currentGraph);
-
-	console.log(currentGraph);
+	// Randomize graph positions
+	generator.randomize(graph);
 
 	// Put it on screen
-	var currentSigma = new sigma({
-		graph: currentGraph,
+	currentSigma = new sigma({
+		graph: graph,
 		container: "container",
 		settings: {maxNodeSize: 8},
 	});
 
-	// Create the force-directed layout, and show it for every iteration
-	multistage.createLayoutRegular(graph.nodes, graph.edges, function(vertices) {
-		console.log(vertices);
-	});
+	// Keep an array of vertice updates, and update the graph periodically
+	var updateCounter = 0;
+	var updates = [];
+
+	var currentNodes = currentSigma.graph.nodes();
+
+	// Hide all nodes first
+	for(var i = 0; i < currentNodes.length; ++i) {
+		currentNodes[i].hidden = true;
+	}
+
+	currentSigma.refresh();
+
+	// Function periodically called to update node positions
+	function updateGraph() {
+		// Don't do anything if there are no updates
+		if(updateCounter >= updates.length) {
+			setTimeout(updateGraph, updateTimeout);
+			return;
+		}
+
+		var newNodes = updates[updateCounter];
+
+		for(var i = 0; i < newNodes.length; ++i) {
+			var newNode = newNodes[i];
+			var currentNode = currentNodes[parseInt(newNode.id)];
+
+			currentNode.x = newNode.x;
+			currentNode.y = newNode.y;
+			currentNode.hidden = false;
+		}
+
+		// $("#updateContainer").text("Now on iteration " + (updateCounter + 1) + " of " + updates.length);
+		currentSigma.refresh();
+
+		// Update the counter, but make sure we reach the end
+		if(updateCounter == updates.length - 1) {
+			return;
+		}
+
+		updateCounter += updateStep;
+		if(updateCounter >= updates.length) {
+			updateCounter = updates.length - 1;
+		}
+		
+		setTimeout(updateGraph, updateTimeout);
+	}
+
+	// Create the force-directed layout, and keep track of the changes per force movement
+	function collectUpdates(vertices) {
+
+		update = [];
+		for(var i = 0; i < vertices.length; ++i) {
+			update.push({x: vertices[i].x, y: vertices[i].y, id: vertices[i].id});
+		}
+
+		updates.push(update);
+
+	}
+
+	if(multistageEnabled)
+		multistage.createLayout(graph.nodes, graph.edges, collectUpdates );
+	else
+		multistage.createLayoutRegular(graph.nodes, graph.edges, collectUpdates );
+
+	updateGraph();
 }
 
 var init = function()

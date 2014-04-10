@@ -32,7 +32,7 @@
 		return vertices;
 	}
 
-	multistage.createLayout = function(nodes, edges)
+	multistage.createLayout = function(nodes, edges, updateFunction)
 	{
 		var vertices = toVertices(nodes, edges);
 		var verticeAmount = vertices.length;
@@ -73,6 +73,9 @@
 				
 				iterations++;
 				totalIterations++;
+
+				if(updateFunction !== null)
+					updateFunction(supervertices);
 
 				if(change <= stop || iterations >= 10000) {
 					break;
@@ -115,7 +118,7 @@
 		return resultGraph;
 	}
 
-	multistage.createLayoutRegular = function(nodes, edges, refreshFunction)
+	multistage.createLayoutRegular = function(nodes, edges, updateFunction)
 	{
 		var vertices = toVertices(nodes, edges);
 		var verticeAmount = vertices.length;
@@ -140,12 +143,12 @@
 			var change = force(vertices, s, l, r, c) / verticeAmount;
 			iterations++;
 
+			if(updateFunction !== null)
+				updateFunction(vertices);
+
 			if(change <= stop || iterations >= 10000) {
 				break;
 			}
-
-			if(updateFunction !== null)
-				updateFunction(vertices);
 		}
 
 		if(window.forceDebug)
