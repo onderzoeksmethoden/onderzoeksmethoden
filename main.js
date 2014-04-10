@@ -4,13 +4,14 @@ var currentSigma = null;
 $(function() {
 
 	var graphs = {
-		"sierpinski_4": function() { return generator.generateSierpinskiGraph(4); }, 
 		"square_grid": function() { return generator.generateSquareGrid(11, 11); },
-		"hexagon_grid": function() { return generator.generateHexagonalGrid(5, 5); },
+		"hexagon": function() { return generator.generateHexagonalGrid(5, 5); },
+		"sierpinski": function() { return generator.generateSierpinskiGraph(4); }, 
 		"tree": function() { return generator.generateTree(3, 4); },
 		"cylinder": function() { return generator.generateFatPolygon(8, 15, 1); },
-		"procedural1": function() { return generator.generateFatPolygon(4, 4, 2); },
-		"randomized21": function() { return createRandomGraph(120, 2, 50, 50); },
+		"lowbranch": function() { return generator.generateFatPolygon(4, 4, 2); },
+		"randomsparse": function() { return createRandomGraph(120, 1, 50, 50); },
+		"randomdense": function() { return createRandomGraph(120, 2, 50, 50); },
 	}
 
 	for(var graphName in graphs) {
@@ -72,6 +73,7 @@ var runDemo = function(graph, multistageEnabled, updateTimeout, updateStep)
 			currentNode.x = newNode.x;
 			currentNode.y = newNode.y;
 			currentNode.hidden = false;
+			currentNode.color = "#000000";
 		}
 
 		// $("#updateContainer").text("Now on iteration " + (updateCounter + 1) + " of " + updates.length);
